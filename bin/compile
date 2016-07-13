@@ -6,7 +6,6 @@ BUILD_DIR=$1
 CLEAN_FILES=.slug-post-clean
 source $BIN_DIR/utils
 
-puts-step "Cleaning up...."
 if [[ ! -n "${BUILD_DIR}" ]]; then
   puts-step "No build directory specified - exiting"
   exit 1
@@ -19,17 +18,19 @@ if [[ ! -f "${CLEAN_FILES}" ]]; then
   exit 1
 fi
 
-while read file; do
-  puts-step "Test ${file}"
-  [[ ! -n "${file}" ]] && continue
+puts-step "Cleaning up...."
+while IFS='' read -r line || [[ -n "$line" ]]; do
+  [[ ! -n "${line}" ]] && continue
 
-  if [[ -f "${file}" ]]; then
-    puts-step "Removing file ${file} from slug"
-    rm -f ${file}
-  elif [[ -d "${file}" ]]; then
-    puts-step "Removing directory ${file} from slug"
-    deep-rm -rf ${file}
+  if [[ -f "${line}" ]]; then
+    puts-step "Removing line ${line} from slug"
+    rm -f $line
+  elif [[ -d "${line}" ]]; then
+    puts-step "Removing directory ${line} from slug"
+    rm -fR "${line}"
   else
-    puts-step "Location ${file} not found - ignoring"
+    puts-step "Location ${line} not found - ignoring"
   fi
-done <${CLEAN_FILES}
+done <$CLEAN_FILES
+
+
