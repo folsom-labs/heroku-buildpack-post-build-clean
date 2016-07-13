@@ -1,32 +1,35 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
+BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
+BUILD_DIR=$1
+CLEAN_FILES=.slug-post-clean
+source $BIN_DIR/utils
 
-readonly BUILD_DIR=$1
-readonly CLEAN_FILES=.slug-post-clean
-
+puts-step "Cleaning up...."
 if [[ ! -n "${BUILD_DIR}" ]]; then
-  echo "No build directory specified - exiting"
+  puts-step "No build directory specified - exiting"
   exit 1
 fi
 
 cd ${BUILD_DIR}
 
 if [[ ! -f "${CLEAN_FILES}" ]]; then
-  echo "Could not find .slug-post-clean file - exiting"
+  puts-step "Could not find .slug-post-clean file - exiting"
   exit 1
 fi
 
 while read file; do
+  puts-step "Test ${file}"
   [[ ! -n "${file}" ]] && continue
 
   if [[ -f "${file}" ]]; then
-    echo "Removing file ${file} from slug"
+    puts-step "Removing file ${file} from slug"
     rm -f ${file}
   elif [[ -d "${file}" ]]; then
-    echo "Removing directory ${file} from slug"
-    rm -rf ${file}
+    puts-step "Removing directory ${file} from slug"
+    deep-rm -rf ${file}
   else
-    echo "Location ${file} not found - ignoring"
+    puts-step "Location ${file} not found - ignoring"
   fi
 done <${CLEAN_FILES}
